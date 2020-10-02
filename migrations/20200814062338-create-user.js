@@ -20,6 +20,9 @@ module.exports = {
       phone: {
         type: Sequelize.STRING
       },
+      gender: {
+        type: Sequelize.STRING
+      },
       address: {
         type: Sequelize.STRING
       },
@@ -31,21 +34,12 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE
       },
-      user_id: {
-        type: Sequelize.INTEGER
+      admin: {
+        type: Sequelize.BOOLEAN
       },
-      image_trip_1: {
+      picture: {
         type: Sequelize.STRING
-      },
-      image_trip_2: {
-        type: Sequelize.STRING
-      },
-      image_trip_3: {
-        type: Sequelize.STRING
-      },
-      image_trip_4: {
-        type: Sequelize.STRING
-      },
+      },  
     });
   },
   down: async (queryInterface, Sequelize) => {

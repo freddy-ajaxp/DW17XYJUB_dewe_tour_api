@@ -58,7 +58,23 @@ module.exports = {
       updatedAt: {
         allowNull: false,
         type: Sequelize.DATE
-      }
+      },
+      
+      user_id: {
+        type: Sequelize.INTEGER
+      },
+      image_trip_1: {
+        type: Sequelize.STRING
+      },
+      image_trip_2: {
+        type: Sequelize.STRING
+      },
+      image_trip_3: {
+        type: Sequelize.STRING
+      },
+      image_trip_4: {
+        type: Sequelize.STRING
+      },
     });
   },
   down: async (queryInterface, Sequelize) => {
