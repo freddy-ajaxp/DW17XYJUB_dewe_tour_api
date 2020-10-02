@@ -60,7 +60,7 @@ exports.getUser = async (req, res) => {
 
 exports.storeUser = async (req, res) => {
   try {
-    const { fullname, email, password, phone, address, picture} = req.body;
+    const { fullname, email, password, phone, address, picture, gender} = req.body;
     const emailExist = await user.findOne({
       where: {
         email,
@@ -86,6 +86,8 @@ exports.storeUser = async (req, res) => {
       address: address,
       picture: picture,
       admin: 0,
+      gender,
+
     });
 
     const secret_key = process.env.SECRET_KEY;

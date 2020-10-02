@@ -5,8 +5,8 @@ const {
 module.exports = (sequelize, DataTypes) => {
   class user extends Model {
     static associate(models) {
-      // define association here
-      user.hasOne(models.Transaction, {
+      //hasmany untuk list transactions
+      user.hasMany(models.Transaction, {
         foreignKey: "userId",
       });
     }
@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
     email: DataTypes.STRING,
     password: DataTypes.STRING,
     phone: DataTypes.STRING,
+    gender: DataTypes.STRING,
     address: DataTypes.STRING,
     admin: DataTypes.BOOLEAN,
     picture: DataTypes.STRING

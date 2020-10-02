@@ -9,6 +9,12 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'tripId',
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE'
+      }),
+      //untuk list transactions
+      Transaction.belongsTo(models.user, {
+        foreignKey: 'userId',
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
       })
     }
   };

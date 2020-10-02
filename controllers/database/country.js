@@ -7,6 +7,7 @@ const { valid } = require("@hapi/joi");
 exports.getAllCountries = async (request, response) => {
   try {
     const countries = await country.findAll({
+      order: [["nama_negara", "ASC"]],
       attributes: { exclude: ["createdAt", "updatedAt"] },
     });
     response.status(200).send({

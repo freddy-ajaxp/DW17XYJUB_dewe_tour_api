@@ -1,23 +1,35 @@
 const { Trip: trip } = require("../../models");
 const { Country } = require("../../models");
+const { Transaction } = require("../../models");
 const { ImageTrip } = require("../../models");
 const bycript = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const joi = require("@hapi/joi");
 const { valid } = require("@hapi/joi");
 const { Op } = require("sequelize");
-
+const { Sequelize } = require("sequelize");
 
 exports.getAllTrips = async (request, response) => {
   try {
     const trips = await trip.findAll({
-      group: 'Trip.id',
       attributes: { exclude: ["createdAt", "updatedAt"] },
-      include: 
+      include: [
+        {
+          model: Transaction,
+          // group: ["userId"],
+          attributes: [
+            // "id",
+            // "tripId",
+            [Sequelize.fn("sum", Sequelize.col("counterQty")), "takenTrip"],
+            [Sequelize.fn("sum", Sequelize.col("total")), "total"],
+          ],
+        },
         {
           model: Country,
-          attributes: ["id", "nama_negara"],
+          attributes: ["nama_negara"],
         },
+      ],
+      group: ["id"],
     });
     response.status(200).send({
       message: "response Success",
@@ -33,6 +45,95 @@ exports.getAllTrips = async (request, response) => {
   }
 };
 
+exports.getAllTripsTotal = async (request, response) => {
+  try {
+    const trips = await trip.findAll({
+      attributes: { exclude: ["createdAt", "updatedAt"] },
+      include: [
+        {
+          model: Transaction,
+          attributes: [
+            [Sequelize.fn("sum", Sequelize.col("counterQty")), "takenTrip"],
+            [Sequelize.fn("sum", Sequelize.col("total")), "total"],
+          ], 
+
+            
+        //   attributes: {
+        //     include: [
+        //         [
+        //             // Note the wrapping parentheses in the call below!
+        //             sequelize.literal(`(
+        //                 SELECT SUM(*)
+        //                 FROM reactions AS reaction
+        //                 WHERE
+        //                     reaction.postId = post.id
+        //                     AND
+        //                     reaction.type = "Laugh"
+        //             )`),
+        //             'laughReactionsCount'
+        //         ]
+        //     ]
+        // }
+        },
+        {
+          model: Country,
+          attributes: ["nama_negara"],
+        },
+      ],
+      group: ["id"],
+    });
+    response.status(200).send({
+      message: "response Success",
+      data: { trips },
+    });
+  } catch (err) {
+    console.log(err);
+    response.status(500).send({
+      error: {
+        message: "Server ERROR",
+      },
+    });
+  }
+};
+
+// jaga2 soalnya mau di edit
+// exports.getAllTripsTotal = async (request, response) => {
+//   try {
+//     const trips = await trip.findAll({
+//       attributes: { exclude: ["createdAt", "updatedAt"] },
+//       include: [
+//         {
+//           model: Transaction,
+//           // where: {
+//           //   status: "Approved",
+//           // },
+//           // group: ["userId"],
+//           attributes: [
+//             [Sequelize.fn("sum", Sequelize.col("counterQty")), "takenTrip"],
+//             [Sequelize.fn("sum", Sequelize.col("total")), "total"],
+//           ],
+//         },
+//         {
+//           model: Country,
+//           attributes: ["nama_negara"],
+//         },
+//       ],
+//       group: ["id"],
+//     });
+//     response.status(200).send({
+//       message: "response Success",
+//       data: { trips },
+//     });
+//   } catch (err) {
+//     console.log(err);
+//     response.status(500).send({
+//       error: {
+//         message: "Server ERROR",
+//       },
+//     });
+//   }
+// };
+
 exports.getTrip = async (req, res) => {
   try {
     const { id } = req.params;
@@ -40,22 +141,26 @@ exports.getTrip = async (req, res) => {
       where: {
         id: id,
       },
-      
-      attributes: { 
+      attributes: {
         exclude: ["createdAt", "updatedAt"],
       },
       include: [
         {
           model: Country,
           attributes: ["id", "nama_negara"],
-          
         },
         {
           model: ImageTrip,
           attributes: ["id", "gambar1", "gambar2", "gambar3", "gambar4"],
-          
-        }]
-      
+        },
+        {
+          model: Transaction,
+          attributes: [
+            [Sequelize.fn("sum", Sequelize.col("counterQty")), "takenTrip"],
+            [Sequelize.fn("sum", Sequelize.col("total")), "total"],
+          ],
+        }
+      ],
     });
 
     if (!detailTrip)
@@ -89,7 +194,6 @@ exports.storeTrip = async (req, res) => {
         title: title,
       },
     });
-    console.log(tripExist)
     if (tripExist) {
       return res.status(409).send({
         error: {
@@ -97,11 +201,10 @@ exports.storeTrip = async (req, res) => {
         },
       });
     }
-    console.log("breakpoint5")
     const queryResponse = await trip.create({
       ...req.body,
     });
-    console.log(queryResponse);
+
     res.status(200).send({
       message: "trip baru berhasil ditambahkan",
       data: {
@@ -160,7 +263,6 @@ exports.patchTrip = async (req, res) => {
         id: req.params.id,
       },
     });
-    console.log(queryResult);
     return res.status(200).send({
       data: {
         message: "trip is successfully updated ",
@@ -180,17 +282,15 @@ exports.getTripByUserId = async (request, response) => {
   try {
     const { id } = request.params;
     const trips = await trip.findAll({
-      group: 'Trip.id',
+      group: "Trip.id",
       attributes: { exclude: ["createdAt", "updatedAt"] },
-      include: 
-        {
-          model: Country,
-          attributes: ["id", "nama_negara"],
-        },
-      where:{
-        user_id:id
-      }
-      
+      include: {
+        model: Country,
+        attributes: ["id", "nama_negara"],
+      },
+      where: {
+        user_id: id,
+      },
     });
     response.status(200).send({
       message: "response Success",
@@ -207,21 +307,15 @@ exports.getTripByUserId = async (request, response) => {
 };
 
 exports.searchTrip = async (request, response) => {
-  // console.log('Request.body',request.query.keyword)
-  let name = request.query.keyword
-  // let  name = request.body.keyword
-
-  console.log('name yang ditangkap',name)
-  // name="jepang"
+  let name = request.query.keyword;
   try {
     const trips = await trip.findAll({
-      where: { title: {[Op.like]: '%' +name +'%'} },
-      include: 
-      {
+      where: { title: { [Op.like]: "%" + name + "%" } },
+      include: {
         model: Country,
         attributes: ["id", "nama_negara"],
       },
-      attributes: { exclude: ["createdAt", "updatedAt"] }
+      attributes: { exclude: ["createdAt", "updatedAt"] },
     });
     response.status(200).send({
       message: "response Success",

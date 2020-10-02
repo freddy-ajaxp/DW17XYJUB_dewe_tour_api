@@ -1,22 +1,30 @@
 const { Transaction } = require("../../models");
 const { Trip } = require("../../models");
 const { Country } = require("../../models");
+const { user: User } = require("../../models");
 const bycript = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const joi = require("@hapi/joi");
 const { valid } = require("@hapi/joi");
+const { Sequelize } = require("sequelize");
 
 exports.getAllTransaction = async (request, response) => {
   try {
     const transactions = await Transaction.findAll({
+      order: [["createdAt", "DESC"]],
       attributes: { exclude: ["createdAt", "updatedAt", "tripId"] },
-      include: {
-        model: Trip,
-        include: {
-          model: Country,
-          attributes: { exclude: ["createdAt", "updatedAt"] },
+      include: [
+        {
+          model: Trip,
+          include: {
+            model: Country,
+            attributes: { exclude: ["createdAt", "updatedAt"] },
+          },
         },
-      },
+        {
+          model: User,
+          attributes: ["fullname"],
+        },
+      ],
     });
     response.status(200).send({
       message: "response Success",
@@ -36,6 +44,7 @@ exports.getTransactionByUserId = async (request, response) => {
   try {
     const { id } = request.params;
     const transactions = await Transaction.findAll({
+      order: [["createdAt", "ASC"]],
       group: "Transaction.id",
       attributes: { exclude: ["createdAt", "updatedAt"] },
       include: {
@@ -44,6 +53,7 @@ exports.getTransactionByUserId = async (request, response) => {
           model: Country,
           attributes: { exclude: ["createdAt", "updatedAt"] },
         },
+        group: "id",
       },
       where: {
         userId: id,
@@ -106,7 +116,7 @@ exports.storeTransaction = async (req, res) => {
     const queryResponse = await Transaction.create({
       ...req.body,
     });
-    console.log(queryResponse);
+
     res.status(200).send({
       message: "transaction baru berhasil ditambahkan",
       data: {
@@ -134,7 +144,7 @@ exports.patchTransaction = async (req, res) => {
         id: req.params.id,
       },
     });
-    console.log(queryResult);
+
     return res.status(200).send({
       data: {
         message: "transaction is successfully updated ",
@@ -151,7 +161,6 @@ exports.patchTransaction = async (req, res) => {
 };
 
 exports.payTransaction = async (req, res) => {
-  console.log("setelah di next, isi dari request", req);
   try {
     const newData = {
       attachment: req.body.namaFileUpload,
@@ -162,7 +171,6 @@ exports.payTransaction = async (req, res) => {
         id: req.body.idTransaksi,
       },
     });
-    console.log(queryResult);
     return res.status(200).send({
       data: {
         message: "transaction is successfully updated ",

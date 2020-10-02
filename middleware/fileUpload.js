@@ -99,28 +99,21 @@ exports.profileUpload = (fileName) => {
   }).single(fileName);
 
   return (req, res, next) => {
-    //   console.log('req di return fu',req.body)
     upload(req, res, function (err) {
-      console.log("breakline 1");
       if (req.fileValidationError)
         return res.status(400).send(req.fileValidationError);
-      console.log("breakline 2");
       if (!req.file && !err)
         return res.status(400).send({
           message: "Please select an image to upload",
         });
-      console.log("breakline 3");
       if (err) {
-        console.log("breakline 4");
         if (err.code === "LIMIT_FILE_SIZE") {
           return res.status(400).send({
             message: "Max file sized 10MB",
           });
         }
-        console.log("breakline 5");
         return res.status(400).send(err);
       }
-	  console.log("breakline 6");
 	  req.body.namaFileUpload=namaFileUpload 
       return next();
     });

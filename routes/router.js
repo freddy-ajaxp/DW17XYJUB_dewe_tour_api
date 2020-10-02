@@ -1,10 +1,10 @@
 const express = require("express");
-const { auth, authAdmin } = require('../middleware/auth');
 const router = express.Router();
+const { auth, authAdmin } = require('../middleware/auth');
 
 const { getAllUsers, getUser, storeUser, login, deleteUser, changeProfile} = require("../controllers/database/user");
 const { getAllCountries, getCountry, storeCountry, patchCountry, deleteCountry} = require("../controllers/database/country");
-const { getAllTrips, getTripByUserId, getTrip, storeTrip, patchTrip, deleteTrip, searchTrip} = require("../controllers/database/trip");
+const { getAllTrips,getAllTripsTotal, getTripByUserId, getTrip, storeTrip, patchTrip, deleteTrip, searchTrip} = require("../controllers/database/trip");
 const { getAllTransaction, getTransactionByUserId, getTransaction, storeTransaction, patchTransaction, payTransaction} = require("../controllers/database/transaction");
 const { fileUpload, profileUpload } = require("../middleware/fileUpload");
 
@@ -26,12 +26,13 @@ router.delete("/country/:id", auth, deleteCountry);
 //TABEL TRIP: get getall post edit delete
 router.get("/trips", getAllTrips);
 router.get("/trips/:id", getTripByUserId);
+router.get("/trips-total/", getAllTripsTotal);
 router.get("/trip/:id", getTrip);
 router.get("/search/", searchTrip);
 router.post("/trip/", auth, storeTrip);
 router.patch("/trip/:id", auth, patchTrip);
 router.delete("/trip/:id", auth, deleteTrip);
-
+ 
 //TABEL TRANSACTION: get getall post edit delete
 router.get("/transactions", getAllTransaction);
 router.get("/transactions/:id", getTransactionByUserId);

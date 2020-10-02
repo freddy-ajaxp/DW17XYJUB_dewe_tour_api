@@ -10,8 +10,11 @@ module.exports = (sequelize, DataTypes) => {
       }),
       Trip.hasOne(models.ImageTrip, {
         foreignKey: "trip_id",
-      });
-      
+      }),
+      //nambahin ini supaya bisa include
+      Trip.hasOne(models.Transaction, {
+        foreignKey: "tripId",
+      })
     }
   };
   Trip.init({
