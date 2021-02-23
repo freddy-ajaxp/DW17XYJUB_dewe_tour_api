@@ -1,4 +1,4 @@
-Aplikasi tour & travel menggunakan react. Dapat digunakan untuk mempromosikan paket wisata anda.
+Aplikasi tour & travel menggunakan NodeJs. Dapat digunakan untuk mempromosikan paket wisata anda.
 
 ini adalah bagian back-end (API) dari aplikasi.
 
