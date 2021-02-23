@@ -2,12 +2,13 @@ const { Trip: trip } = require("../../models");
 const { Country } = require("../../models");
 const { Transaction } = require("../../models");
 const { ImageTrip } = require("../../models");
+//db untuk literal
+const db  = require("../../models");
+
 const bycript = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const joi = require("@hapi/joi");
-const { valid } = require("@hapi/joi");
+const jwt = require("jsonwebtoken");  
 const { Op } = require("sequelize");
-const { Sequelize } = require("sequelize");
+const { Sequelize, QueryTypes } = require("sequelize");
 
 exports.getAllTrips = async (request, response) => {
   try {
@@ -16,20 +17,27 @@ exports.getAllTrips = async (request, response) => {
       include: [
         {
           model: Transaction,
-          // group: ["userId"],
           attributes: [
-            // "id",
-            // "tripId",
+            "id",
             [Sequelize.fn("sum", Sequelize.col("counterQty")), "takenTrip"],
             [Sequelize.fn("sum", Sequelize.col("total")), "total"],
+            // [db.sequelize.literal(`(SELECT Sum(counterQty) FROM Transactions where Transactions.tripId = Trips.id )`), 'takenTrip'],
           ],
+          group: ['Transaction.id'],
+          include: [
+            {
+              model: trip,
+              attributes: []
+            }
+          ],
+          raw:true,
         },
         {
           model: Country,
           attributes: ["nama_negara"],
         },
       ],
-      group: ["id"],
+      group: "Trip.id",
     });
     response.status(200).send({
       message: "response Success",
@@ -52,35 +60,18 @@ exports.getAllTripsTotal = async (request, response) => {
       include: [
         {
           model: Transaction,
+          group: "Transaction.id",
           attributes: [
             [Sequelize.fn("sum", Sequelize.col("counterQty")), "takenTrip"],
             [Sequelize.fn("sum", Sequelize.col("total")), "total"],
           ], 
-
-            
-        //   attributes: {
-        //     include: [
-        //         [
-        //             // Note the wrapping parentheses in the call below!
-        //             sequelize.literal(`(
-        //                 SELECT SUM(*)
-        //                 FROM reactions AS reaction
-        //                 WHERE
-        //                     reaction.postId = post.id
-        //                     AND
-        //                     reaction.type = "Laugh"
-        //             )`),
-        //             'laughReactionsCount'
-        //         ]
-        //     ]
-        // }
         },
         {
           model: Country,
           attributes: ["nama_negara"],
         },
       ],
-      group: ["id"],
+      group: "Trip.id",
     });
     response.status(200).send({
       message: "response Success",
@@ -96,43 +87,6 @@ exports.getAllTripsTotal = async (request, response) => {
   }
 };
 
-// jaga2 soalnya mau di edit
-// exports.getAllTripsTotal = async (request, response) => {
-//   try {
-//     const trips = await trip.findAll({
-//       attributes: { exclude: ["createdAt", "updatedAt"] },
-//       include: [
-//         {
-//           model: Transaction,
-//           // where: {
-//           //   status: "Approved",
-//           // },
-//           // group: ["userId"],
-//           attributes: [
-//             [Sequelize.fn("sum", Sequelize.col("counterQty")), "takenTrip"],
-//             [Sequelize.fn("sum", Sequelize.col("total")), "total"],
-//           ],
-//         },
-//         {
-//           model: Country,
-//           attributes: ["nama_negara"],
-//         },
-//       ],
-//       group: ["id"],
-//     });
-//     response.status(200).send({
-//       message: "response Success",
-//       data: { trips },
-//     });
-//   } catch (err) {
-//     console.log(err);
-//     response.status(500).send({
-//       error: {
-//         message: "Server ERROR",
-//       },
-//     });
-//   }
-// };
 
 exports.getTrip = async (req, res) => {
   try {
@@ -155,6 +109,7 @@ exports.getTrip = async (req, res) => {
         },
         {
           model: Transaction,
+          group: "Transaction.id",
           attributes: [
             [Sequelize.fn("sum", Sequelize.col("counterQty")), "takenTrip"],
             [Sequelize.fn("sum", Sequelize.col("total")), "total"],

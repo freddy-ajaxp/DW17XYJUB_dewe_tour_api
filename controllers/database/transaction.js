@@ -11,6 +11,7 @@ exports.getAllTransaction = async (request, response) => {
   try {
     const transactions = await Transaction.findAll({
       order: [["createdAt", "DESC"]],
+      group: ["Transaction.id"],
       attributes: { exclude: ["createdAt", "updatedAt", "tripId"] },
       include: [
         {
@@ -53,7 +54,7 @@ exports.getTransactionByUserId = async (request, response) => {
           model: Country,
           attributes: { exclude: ["createdAt", "updatedAt"] },
         },
-        group: "id",
+        group: "Trip.id",
       },
       where: {
         userId: id,

@@ -8,9 +8,6 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE'
       }),
-      Trip.hasOne(models.ImageTrip, {
-        foreignKey: "trip_id",
-      }),
       //nambahin ini supaya bisa include
       Trip.hasOne(models.Transaction, {
         foreignKey: "tripId",

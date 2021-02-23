@@ -27,7 +27,7 @@ exports.getAllCountries = async (request, response) => {
 exports.getCountry = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log(id);
+    // console.log(id);
     const detailUser = await country.findOne({
       where: {
         id: id,
